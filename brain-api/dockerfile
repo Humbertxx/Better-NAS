@@ -1,0 +1,30 @@
+FROM golang:1.22 AS builder
+WORKDIR /build
+
+# Copy mod files and download the dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy full source tree
+COPY . .
+
+# Build all three binaries
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/bin/api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/bin/sorter ./cmd/sorter
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/bin/adminctl ./cmd/adminctl
+
+# Runtime stage
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates tzdata
+
+WORKDIR /app
+
+# Copy all three binaries
+COPY --from=builder /build/bin/api /build/bin/sorter /build/bin/adminctl ./
+
+# Health check for the API service (used by Caddy)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD /app/api -healthz || exit 1
+
+# Default to API (can override in compose)
+ENTRYPOINT ["/app/api"]
