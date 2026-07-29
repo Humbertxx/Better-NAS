@@ -1,0 +1,62 @@
+# sorter-config.yaml
+
+inbox: /mnt/nas/incoming
+
+folders:
+  private: /mnt/nas/private
+  college: /mnt/nas/college
+  notes: /mnt/nas/notes
+  media_screenshots: /mnt/nas/media/screenshots
+  media_photos: /mnt/nas/media/photos
+  unsorted: /mnt/nas/unsorted
+
+# filename-based rules
+rules:
+  - id: billing_prefix
+    phase: 1
+    type: prefix        # filename starts with this string
+    pattern: "Billing"
+    target: private
+    priority: 1
+
+  - id: ucf_in_name
+    phase: 1
+    type: contains      # filename contains this substring
+    pattern: ["UCF", "COBA", "university of central florida"]
+    target: college
+    priority: 2
+
+  - id: course_code
+    phase: 1
+    type: regex         # filename matches regex pattern
+    pattern: "[A-Z]{3}[0-9]{4}"
+    target: semester_year
+    priority: 3
+  
+  - id: semester_year
+    phase: 1
+    type: regex         # filename matches regex pattern 
+    pattern: ^[A-Z]0*(?:1[5-9]|[2-9][0-9]|201[4-9]|20[2-9][0-9])$
+    target: college
+    priority: 3
+
+  - id: screenshot_prefix
+    phase: 1
+    type: prefix
+    pattern: "Screenshot"
+    target: media_screenshots
+    priority: 4
+
+  - id: image_extension_photo
+    phase: 1
+    type: extension
+    pattern: [".jpg", ".jpeg"]
+    target: media_photos
+    priority: 5
+
+  - id: image_extension_png_photo
+    phase: 1
+    type: extension
+    pattern: ".png"
+    target: media_photos
+    priority: 6

@@ -1,0 +1,29 @@
+services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    ports:
+      - "${HTTP_INGRESS}:80"
+      - "${HTTP_INGRESS_2}:443"
+      - "${COUCH_DB_PORT}:5984"    # CouchDB (LiveSync) via Caddy
+      - "${OBSIDIAN_GUI_PORT}:3000"    # Obsidian GUI via Caddy
+
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+   
+    networks:
+      - web
+
+    restart: unless-stopped
+
+networks:
+  web:
+    name: web
+    driver: bridge
+    
+volumes:
+  caddy_data:
+  caddy_config:
