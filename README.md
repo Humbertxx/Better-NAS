@@ -104,27 +104,6 @@ Phones still hit `https://<tailnet-host>:5984`. The bridge has no inbound HTTP s
 
 On the CouchDB peer, `baseDir` only filters. The storage peer folder is the real write target.
 
-## Phase C — livesync-bridge (Aug 22, 2026)
-
-GUI container is gone. Bridge is up (`livesync-bridge`, 200 MB cap).
-
-| Check | Result |
-| --- | --- |
-| End-to-end encryption | Off |
-| Obfuscate Properties | **On and locked** after remote init. There is no separate obfuscation field in the plugin. Put the vault **Passphrase** into `bridge-dat/config.json` as `obfuscatePassphrase`. Leave `passphrase` empty while E2EE is off. |
-| Forward (Obsidian → disk) | Passed. After `Replicate now`, notes land under `VAULT_PATH`. Bridge user is UID 1993 (`deno`); the vault dir needs `u:1993:rwX` (ACL) or equivalent. Existing CouchDB docs are not replayed after a restart (`Watch starting from now`). |
-| Reverse (disk → phone) | Not recorded yet |
-| Conflict (phone + disk same note) | Not recorded yet |
-
-Bring-up:
-
-```bash
-cd ~/docker-stack/edge && docker compose up -d
-cd ~/docker-stack/ai-brain && docker compose up -d
-```
-
-Do not start the bridge until the first Obsidian client has finished initializing a new remote.
-
 ## brain-api / `internal/vault`
 
 Filesystem is authoritative. `internal/vault` is a plain-file client (read/write markdown + frontmatter). No CouchDB chunk format, no Obsidian REST plugin, no `OBSIDIAN_*` env. Env is `VAULT_PATH` + `INBOX_PATH`. `COUCHDB_URL` is deferred until something actually needs sync-state inspection.
