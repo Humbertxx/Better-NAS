@@ -1,11 +1,10 @@
-# NAS AI-Brain — `docker-stack/`
+# NAS AI-Brain
 
 Self-hosted AI-brain platform: Obsidian LiveSync through CouchDB on a Linux NAS,
 reached over Tailscale and fronted by Caddy. The filesystem is the vault;
 livesync-bridge is the sync transport; CouchDB is the wire format phones speak;
 nothing on the NAS runs Obsidian.
 
-Operational index. [New NAS Setup Aug 3, 2026](https://app.notion.com/p/3b116a051edb814a9062ce4d134f3b1b) wins on conflict.
 
 ## Folder layout
 
