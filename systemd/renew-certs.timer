@@ -1,0 +1,16 @@
+[Unit]
+Description= Renew Certs for Tailscale every 58 + 2 + 30 days, certificate renewal
+
+[Timer]
+# Run every three months (Jan, Apr, Jul, Oct) on the 1st at 02:00
+OnCalendar=*-01,04,07,10-01 02:00:00
+
+# Spread the start time by up to 1 hour
+AccuracySec=1m
+RandomizedDelaySec=1h
+
+# Run at boot if the scheduled time was missed
+Persistent=true
+
+[Install]
+WantedBy=timers.target

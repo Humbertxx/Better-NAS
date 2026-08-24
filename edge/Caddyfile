@@ -1,12 +1,12 @@
 
 # CouchDB
-humbertx-inspiron-15-3567.tail761986.ts.net:5984 {
-    tls internal
-    reverse_proxy obsidian-sync:5984
+{$HOST}:5984 {
+	tls /etc/caddy/certs/{$HOST}.crt /etc/caddy/certs/{$HOST}.key
+	reverse_proxy obsidian-sync:5984
 }
 
-# Obsidian GUI
-humbertx-inspiron-15-3567.tail761986.ts.net:3000 {
-    tls internal
-    reverse_proxy obsidian-brain:3000
+# Pi-hole
+{$HOST}:8089 {
+	tls /etc/caddy/certs/{$HOST}.crt /etc/caddy/certs/{$HOST}.key
+	reverse_proxy pihole:80
 }

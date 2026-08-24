@@ -1,0 +1,23 @@
+[Unit]
+Description=Renew Tailscale certificates
+After=network-online.target
+Wants=network-online.target
+
+# Don't fail if Tailscale isn't set up yet yet
+
+ConditionFileIsExecutable=/home/humbertx/docker-stack/scripts/renew.certs.sh
+
+[Service]
+Type=oneshot
+User=humbertx
+# Renew all certificates managed by renew.certs.sh
+
+ExecStart= /home/humbertx/docker-stack/ai-brain/scripts/renew.certs.sh --cron --home /home/humbertx/docker-stack/ai-brain/scripts/renew.certs.sh
+
+# Log output to journal under this identifier
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tailscale-cert-renew
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+FROM golang:1.22 AS builder
+WORKDIR /build
+
+# Copy mod files and download the dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy full source tree
+COPY . .
+
+# Build the Failback binary
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/bin/failback ./cmd/failback
+
+# Runtime stage
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates tzdata
+
+WORKDIR /app
+
+# Copy the Failback binary
+COPY --from=builder /build/bin/failback ./
+
+# Health check for the Failback service (used by Caddy)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD /app/failback -healthz || exit 1
+
+# Default to Failback (can override in compose)
+ENTRYPOINT ["/app/failback"]

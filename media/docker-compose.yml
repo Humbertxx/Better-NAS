@@ -1,0 +1,142 @@
+services:
+  # ─── GLUETUN ───────────────────────────────────────────────
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    env_file: .env
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=${VPN_TYPE}
+      - OPENVPN_USER=${OPENVPN_USER}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - FIREWALL_INPUT_PORTS=8080,8000,8888
+      - HTTPPROXY=on
+      - HTTP_CONTROL_SERVER_ADDRESS=:8000
+      - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}'
+    volumes:
+      - ${CONFIG_PATH}/gluetun:/gluetun
+    networks:
+      - web
+      - media_net
+    restart: unless-stopped
+
+  # ─── QBITTORRENT ───────────────────────────────────────────
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    env_file: .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    volumes:
+      - ${CONFIG_PATH}/qbittorrent:/config
+      - ${MEDIA_PATH}:/data          # host /mnt/nas/library — not this repo
+    restart: unless-stopped
+
+  # ─── JELLYFIN ─────────────────────────────────────────────
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: "${PUID}:${PGID}"
+    env_file: .env
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/jellyfin:/config
+      - ${MEDIA_PATH}:/data:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+  # ─── SEERR ────────────────────────────────────────────────
+  seerr:
+    image: seerr/seerr:latest
+    container_name: seerr
+    env_file: .env
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/seerr:/app/config
+    networks:
+      - web
+    restart: unless-stopped
+
+  # ─── SONARR ───────────────────────────────────────────────
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    env_file: .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/sonarr:/config
+      - ${MEDIA_PATH}:/data
+    networks:
+      - web
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── RADARR ───────────────────────────────────────────────
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    env_file: .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_PATH}/radarr:/config
+      - ${MEDIA_PATH}:/data
+    networks:
+      - web
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── PROWLARR ─────────────────────────────────────────────
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    env_file: .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - HTTP_PROXY=http://gluetun:8888
+      - HTTPS_PROXY=http://gluetun:8888
+      - NO_PROXY=localhost,127.0.0.1,gluetun,sonarr,radarr,seerr,jellyfin,caddy,pihole
+    volumes:
+      - ${CONFIG_PATH}/prowlarr:/config
+    networks:
+      - web
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ─── NETWORKS ───────────────────────────────────────────────
+networks:
+  web:
+    external: true
+    name: web
+  media_net:
+    name: media_net
+    driver: bridge

@@ -1,0 +1,12 @@
+[Unit]
+Description=Backup the vault
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=humbertx
+ExecStart=/home/humbertx/docker-stack/ai-brain/scripts/backup-vault.sh
+
+[Install]
+WantedBy=multi-user.target

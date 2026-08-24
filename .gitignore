@@ -1,61 +1,63 @@
-# === ENVIRONMENT & SECRETS ===
+# === SECRETS ===
 .env
 .env.local
 .env.*.local
+**/.env
 *.key
 *.pem
-*.crt
 credentials.json
 oauth2.json
- 
-# === DOCKER ===
-docker-compose.override.yml
+
+# TLS material (directory mount — never individual files)
+certs/
+
+# Nested git repo (CouchDB data, Obsidian runtime) — not this stack
+ai-brain/
+
+# === RUNTIME DATA (keep stack source tracked) ===
+*-data/
 couchdb-data/
 n8n-data/
-.dockerignore
- 
-# === GO BINARIES & BUILDS ===
+etc-pihole/
+obsidian-config/
+media/config/*
+!media/config/.gitkeep
+
+# Bridge runtime + live config (holds CouchDB creds).
+# Ignore contents, not the directory, so the example can be committed.
+**/bridge-dat/*
+!**/bridge-dat/config.json.example
+!**/bridge-dat/.gitkeep
+
+# === BUILD
 bin/
 dist/
+build/
+vendor/
+node_modules/
 *.exe
-*.exe~
 *.dll
 *.so
-*.so.*
 *.dylib
-vault-harvester
-vault-save
-vault-watch
-vault-mcp
-cmd/*/[a-z]* # Don't commit built binaries in cmd dirs
- 
-# === GO DEPENDENCIES ===
-vendor/
-go.sum
-go.mod.backup
- 
-# === NODE/MCP ===
-node_modules/
-package-lock.json
-yarn.lock
-dist/
-build/
- 
-# === OBSIDIAN VAULT (DO NOT COMMIT) ===
-# Keep vault in GitHub separately via Obsidian Git plugin
-config/obsidian-vault/
-# Exception: commit template structure only
-!config/obsidian-vault/.gitkeep
-!config/obsidian-vault/Templates/
- 
-# === OBSIDIAN LOCAL SETTINGS ===
-.obsidian/workspace.json
-.obsidian/cache/
-.obsidian/sync/
-.obsidian/plugins/*/main.js
-.obsidian/plugins/*/.esbuild/
- 
-# === IDE & EDITOR ===
+*.o
+*.a
+*.out
+*.test
+
+# === LOGS / TEMP ===
+*.log
+*.log.*
+logs/
+tmp/
+temp/
+*.tmp
+*.pid
+captures/
+*.backup.json
+*.couch
+couchdb-backup/
+
+# === IDE / OS ===
 .vscode/
 .vscode-server/
 .cursor/
@@ -66,82 +68,12 @@ config/obsidian-vault/
 .DS_Store
 .AppleDouble
 .LSOverride
-*.sublime-workspace
-*.sublime-project
-*.code-workspace
- 
-# === TAILSCALE ===
-state.tailscale.json
-tailscale-derp.log
- 
-# === LOGS & TEMP ===
-*.log
-*.log.*
-logs/
-tmp/
-temp/
-*.tmp
- 
-# === BUILD ARTIFACTS ===
-*.o
-*.a
-*.out
-*.test
- 
-# === MACOS ===
-.DS_Store
-.AppleDouble
-.LSOverride
 ._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
- 
-# === LINUX MINT / SYSTEM ===
 .directory
 .Trash-*/
- 
-# === PROJECT-SPECIFIC ===
-# vault-harvester outputs
-wiki/hot.md.backup
-harvest.log
- 
-# vault-save captures (use vault instead)
-captures/
- 
-# vault-watch pid
-*.pid
- 
-# Local test files
-test-*.md
-debug-*
- 
-# Git credentials cache (after Phase 5.5, don't commit)
-~/.git-credentials
- 
-# === CI/CD ===
-.github/workflows/secrets.yml
-.gitlabci.yml.local
- 
-# === CLAUDE/CURSOR CONTEXT ===
-claude_desktop_config.json.backup
-mcp.json.backup
- 
-# === NAS-SPECIFIC ===
-/home/*/.ssh/id_* # SSH keys on NAS
-/home/*/vault-backup-lock
-/home/*/.bash_history
- 
-# === COUCHDB BACKUPS (Store separately) ===
-couchdb-backup/
-*.backup.json
-*.couch
- 
-# === SYSTEMD SERVICES ===
+Thumbs.db
+
+# === LOCAL OVERRIDES ===
+docker-compose.override.yml
 *.service.local
 systemd-override/
- 
-# === N8N WORKFLOWS (Backup separately) ===
-n8n-workflows-backup/
-*.n8n.json

@@ -1,0 +1,33 @@
+services:
+# ─── PIHOLE ─────────────────────────────────────────────
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    env_file: .env
+    environment:
+      TZ: ${TZ}
+      FTLCONF_webserver_api_password: ${PIHOLE_PASSWORD}
+      # Bridge network: answer DNS on the published host ports.
+      FTLCONF_dns_listeningMode: ALL
+    volumes:
+      - ./etc-pihole:/etc/pihole
+    ports:
+      - "${DNS_PORT}:53/tcp"
+      - "${DNS_PORT}:53/udp"
+      # LAN DHCP. Docker bridge DHCP is unreliable; if leases fail, switch
+      # this service to host networking (and stop publishing 80/443 on the host).
+      - "${DHCP_PORT}:67/udp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+    networks:
+      - web
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: {memory: 90M, cpus: "0.50"}
+
+networks:
+  web:
+    external: true
+    name: web

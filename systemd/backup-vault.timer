@@ -1,0 +1,15 @@
+[unit]
+Description= Backup the vault every week
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+# Spread the start time by up to 1 hour
+AccuracySec=1m
+RandomizedDelaySec=1h
+
+Persistent=true
+
+[Install]
+WantedBy=timers.target

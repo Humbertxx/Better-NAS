@@ -1,29 +1,32 @@
 services:
+# ─── CADDY ─────────────────────────────────────────────
   caddy:
     image: caddy:latest
     container_name: caddy
+    env_file: .env
     ports:
       - "${HTTP_INGRESS}:80"
       - "${HTTP_INGRESS_2}:443"
       - "${COUCH_DB_PORT}:5984"    # CouchDB (LiveSync) via Caddy
-      - "${OBSIDIAN_GUI_PORT}:3000"    # Obsidian GUI via Caddy
-
+      - "${PIHOLE_PORT}:8089"      # Pi-hole admin UI via Caddy
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./certs:/etc/caddy/certs:ro
       - caddy_data:/data
       - caddy_config:/config
-   
+      - /mnt/nas/vault
+      - /mnt/nas/inbox
     networks:
-      - web
-
+      web:
+        aliases:
+          - ${HOST}
     restart: unless-stopped
 
 networks:
   web:
     name: web
     driver: bridge
-    
+
 volumes:
   caddy_data:
   caddy_config:

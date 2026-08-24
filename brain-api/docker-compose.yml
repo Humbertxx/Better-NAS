@@ -1,0 +1,39 @@
+services:
+
+# ─── API ─────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: brain-api:latest
+    container_name: brain-api
+    env_file: .env
+    volumes:
+      - ${HOST_VAULT_PATH}:/vault
+      - ${HOST_INBOX_PATH}:/inbox
+    networks:
+      - web
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: {memory: 96M, cpus: "0.50"}
+
+# ─── SORTER ─────────────────────────────────────────────
+  sorter:
+    image: brain-api:latest
+    container_name: brain-sorter
+    env_file: .env
+    entrypoint: ["/app/sorter"]
+    volumes:
+      - ${HOST_VAULT_PATH}:/vault
+      - ${HOST_INBOX_PATH}:/inbox
+    network_mode: none     
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: {memory: 64M, cpus: "0.50"}
+
+networks:
+  web:
+    external: true
+    name: web
